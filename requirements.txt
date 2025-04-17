@@ -4,3 +4,4 @@ numpy
 pyecharts
 streamlit-echarts
 plotly
+openyxl
