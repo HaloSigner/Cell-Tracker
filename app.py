@@ -142,7 +142,12 @@ def load_data(sheet_name: str = "Default") -> pd.DataFrame:
 def save_data(df: pd.DataFrame, sheet_name: str = "Default"):
     try:
         ws = connect_gsheet(sheet_name)
-        #ws.clear()
+        
+        # ✅ Date 타입을 문자열로 변환
+        if "Date" in df.columns:
+            df["Date"] = df["Date"].astype(str)
+        
+        # ws.clear()  # 선택적으로 사용
         ws.update([df.columns.values.tolist()] + df.values.tolist())
     except Exception as e:
         st.error(f"❌ 저장 실패: {e}")
