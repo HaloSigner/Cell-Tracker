@@ -118,10 +118,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 def connect_gsheet(sheet_name: str):
     gc = gspread.service_account_from_dict(st.secrets["gspread"])
-    sh = gc.open_by_key("YOUR_SPREADSHEET_ID")  # 구글 시트 ID만 넣으면 됩니다
+    sh = gc.open_by_key("1as7cVD4JwZ5A7Vo8XmY2DEjEhQNHkWhg_8awtyx5M7E")
     worksheet = sh.worksheet(sheet_name)
     return worksheet
 
@@ -357,18 +356,19 @@ def render_box_position_map(filtered_df, row_letters, col_numbers):
 # ------------------ MAIN APP ------------------
 # Sidebar for navigation and app control
 with st.sidebar:
-    #st.image("", width=100)
     st.title('Cell Line Manager')
     
-    if os.path.exists(DATA_FILE):
-        sheet_list = pd.ExcelFile(DATA_FILE).sheet_names
-        selected_sheet = st.selectbox("📑 Select Cell Line Sheet", sheet_list if sheet_list else ["Default"])
-    else:
-        selected_sheet = "Default"
-        st.info("No data file found. Starting with a new sheet.")
+    # Google Sheet 내 시트 목록 불러오기
+    def get_google_sheet_names():
+        gc = gspread.service_account_from_dict(st.secrets["gspread"])
+        sh = gc.open_by_key("1as7cVD4JwZ5A7Vo8XmY2DEjEhQNHkWhg_8awtyx5M7E")  # 여기에 실제 스프레드시트 ID 넣기
+        return [ws.title for ws in sh.worksheets()]
+    
+    sheet_list = get_google_sheet_names()
+    selected_sheet = st.selectbox("📑 Select Cell Line Sheet", sheet_list if sheet_list else ["Default"])
     
     tube_df = load_data(sheet_name=selected_sheet)
-    
+
     st.markdown("---")
     
     # Quick stats in sidebar
