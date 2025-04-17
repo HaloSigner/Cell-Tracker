@@ -142,7 +142,7 @@ def load_data(sheet_name: str = "Default") -> pd.DataFrame:
 def save_data(df: pd.DataFrame, sheet_name: str = "Default"):
     try:
         ws = connect_gsheet(sheet_name)
-        ws.clear()
+        #ws.clear()
         ws.update([df.columns.values.tolist()] + df.values.tolist())
     except Exception as e:
         st.error(f"❌ 저장 실패: {e}")
