@@ -156,10 +156,14 @@ def build_tree(df: pd.DataFrame) -> list:
     df["Parent Tube"] = df["Parent Tube"].astype(str).str.strip().str.upper()
     df["Parent Tube"] = df["Parent Tube"].replace(["NONE", "NAN", ""], np.nan)
 
+
     for _, row in df.iterrows():
         tube_id = row["Tube ID"]
         parent_tube = row.get("Parent Tube", np.nan)
         passage = int(row["Passage"])
+
+        date_value = pd.to_datetime(row.get("Date", ""), errors='coerce')
+        date_str = date_value.strftime('%Y-%m-%d') if not pd.isna(date_value) else ""
 
         # Enhanced tooltip with more detailed styling
         tooltip = f"""
@@ -169,7 +173,7 @@ def build_tree(df: pd.DataFrame) -> list:
             </div>
             <div style='display: grid; grid-template-columns: auto 1fr; gap: 5px;'>
                 <div style='color: #7f8c8d;'>Date:</div>
-                <div>{pd.to_datetime(row.get("Date", ""), errors='coerce').strftime('%Y-%m-%d') if pd.notna(row.get("Date", "")) else ''}</div>
+                <div>{date_str}</div>
                 
                 <div style='color: #7f8c8d;'>Location:</div>
                 <div>{row.get("Tray", "")} / {row.get("Box", "")} / {row.get("Position", "")}</div>
