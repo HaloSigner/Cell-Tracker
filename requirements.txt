@@ -1,7 +1,8 @@
-streamlit
-pandas
-numpy
-pyecharts
-streamlit-echarts
-plotly
-openyxl
+ streamlit
+ pandas
+ numpy
+ pyecharts
+ streamlit-echarts
+ plotly
+-openyxl
++openpyxl
