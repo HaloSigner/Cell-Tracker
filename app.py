@@ -10,7 +10,7 @@ from streamlit_echarts import st_pyecharts
 import plotly.express as px
 
 # ------------------ CONFIG ------------------
-DATA_FILE = 'tude_data.xlsx'
+DATA_FILE = "Z:\Project_Shared\Cell_tracker\tude_data.xlsx"
 st.set_page_config(
     page_title='Cell Line Manager', 
     layout='wide',
