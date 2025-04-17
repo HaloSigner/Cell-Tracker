@@ -8,6 +8,7 @@ from pyecharts.charts import Tree
 from pyecharts.commons.utils import JsCode
 from streamlit_echarts import st_pyecharts
 import plotly.express as px
+import gspread
 
 # ------------------ CONFIG ------------------
 DATA_FILE = "tude_data.xlsx"
@@ -117,26 +118,35 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
+def connect_gsheet(sheet_name: str):
+    gc = gspread.service_account_from_dict(st.secrets["gspread"])
+    sh = gc.open_by_key("YOUR_SPREADSHEET_ID")  # 구글 시트 ID만 넣으면 됩니다
+    worksheet = sh.worksheet(sheet_name)
+    return worksheet
+
 # ------------------ LOAD / SAVE ------------------
 def load_data(sheet_name: str = "Default") -> pd.DataFrame:
-    if os.path.exists(DATA_FILE):
-        df = pd.read_excel(DATA_FILE, sheet_name=sheet_name)
+    try:
+        ws = connect_gsheet(sheet_name)
+        data = ws.get_all_records()
+        df = pd.DataFrame(data)
         if "Inuse" not in df.columns:
             df["Inuse"] = "No"
         return df
-    else:
+    except Exception as e:
+        st.warning(f"⚠️ 데이터 로딩 실패: {e}")
         columns = ["Tube ID", "Cell Name", "Passage", "Parent Tube", "Position", "Date", 
-                  "Tray", "Box", "Lot", "Mycoplasma", "Operator", "Info", "Inuse"]
+                   "Tray", "Box", "Lot", "Mycoplasma", "Operator", "Info", "Inuse"]
         return pd.DataFrame(columns=columns)
 
 def save_data(df: pd.DataFrame, sheet_name: str = "Default"):
-    if os.path.exists(DATA_FILE):
-        with pd.ExcelWriter(DATA_FILE, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-            df.to_excel(writer, sheet_name=sheet_name, index=False)
-    else:
-        with pd.ExcelWriter(DATA_FILE, engine='openpyxl') as writer:
-            df.to_excel(writer, sheet_name=sheet_name, index=False)
-
+    try:
+        ws = connect_gsheet(sheet_name)
+        ws.clear()
+        ws.update([df.columns.values.tolist()] + df.values.tolist())
+    except Exception as e:
+        st.error(f"❌ 저장 실패: {e}")
 # ------------------ BUILD TREE ------------------
 def build_tree(df: pd.DataFrame) -> list:
     nodes = {}
