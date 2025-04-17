@@ -1,0 +1,6 @@
+streamlit
+pandas
+numpy
+pyecharts
+streamlit-echarts
+plotly
