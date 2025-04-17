@@ -36,7 +36,7 @@ auth_uri = "https://accounts.google.com/o/oauth2/auth"
 token_uri = "https://oauth2.googleapis.com/token"
 auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
 client_x509_cert_url = "https://www.googleapis.com/robot/v1/metadata/x509/..."
-⚠️ private_key에서 줄바꿈은 반드시 \\n으로 변환해야 합니다.
+⚠️ private_key에서 줄바꿈은 직접 줄바꾸기
 
 ✅ 5. 해당 Google Sheet 공유하기
 연동하고자 하는 Google Sheet 문서를 열고:
