@@ -5,3 +5,5 @@ pyecharts
 streamlit-echarts
 plotly
 openpyxl
+gspread
+oauth2client
