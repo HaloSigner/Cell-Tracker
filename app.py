@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import os
-from datetime import date
+from datetime import date, timedelta
 from pyecharts import options as opts
 from pyecharts.charts import Tree
 from pyecharts.commons.utils import JsCode
@@ -20,6 +20,16 @@ st.set_page_config(
         'About': "Cell Line Tube Manager - Version 2.0"
     }
 )
+
+# ------------ Cell Health Data ------------------
+growth_file = "growth_rate_20220907.xlsx"
+if os.path.exists(growth_file):
+    try:
+        growth_df = pd.read_excel(growth_file)
+    except:
+        growth_df = pd.read_csv(growth_file)
+else:
+    growth_df = pd.DataFrame()
 
 # ------------------ THEME & STYLING ------------------
 # Custom CSS for modern look
@@ -151,6 +161,17 @@ def save_data(df: pd.DataFrame, sheet_name: str = "Default"):
         ws.update([df.columns.values.tolist()] + df.values.tolist())
     except Exception as e:
         st.error(f"❌ 저장 실패: {e}")
+
+# ------------------ Cell Conf Cal ------------------
+def time_to_reach_target(initial_density: float,
+                         doubling_time: float,
+                         target_density: float) -> timedelta:
+    """초기 농도, doubling time, 목표 농도로부터 걸리는 시간 계산"""
+    n_doublings = np.log2(target_density / initial_density)
+    hours = n_doublings * doubling_time
+    return timedelta(hours=hours)
+
+
 # ------------------ BUILD TREE ------------------
 def build_tree(df: pd.DataFrame) -> list:
     nodes = {}
@@ -398,10 +419,11 @@ st.markdown("Modern lab management system for organizing and tracking cell line 
 # Display dashboard metrics
 display_dashboard_metrics(tube_df)
 
-tab1, tab2, tab3 = st.tabs([
+tab1, tab2, tab3, tab4 = st.tabs([
     "➕ Tube Registration", 
     "📋 Tube Management", 
-    "🌳 Lineage Visualization"
+    "🌳 Lineage Visualization",
+    "⏱ Growth Prediction"
 ])
 
 with tab1:
@@ -684,3 +706,34 @@ with tab3:
         # Build and render the tree
         tree_data = build_tree(vis_df)
         render_tree_chart(tree_data, title=tree_title)
+
+
+with tab4:
+    st.header("⏱ Growth Time Prediction")
+    if growth_df.empty:
+        st.warning("growth_rate_20220907.xlsx 파일을 업로드하거나 경로를 확인하세요.")
+    else:
+        # 4-1) 셀 라인 선택
+        cell = st.selectbox(
+            "Select Cell Line", 
+            growth_df["model_name"].unique().tolist()
+        )
+        # 4-2) 초기/목표 Density 입력
+        init_den = st.number_input(
+            "Initial Seeding Density (cells/ml)", 
+            min_value=1, value=1000, step=100
+        )
+        target_den = st.number_input(
+            "Target Density (cells/ml)", 
+            min_value=init_den+1, value=init_den*2, step=100
+        )
+        # 4-3) 버튼 누르면 계산
+        if st.button("Predict Time"):
+            row = growth_df[growth_df["model_name"] == cell].iloc[0]
+            dbl_t = row.get("doubling_time_hours") or row.get("doubling_time")
+            delta = time_to_reach_target(init_den, dbl_t, target_den)
+            # 결과 표시
+            days, rem = delta.days, delta.seconds
+            hours = rem // 3600
+            minutes = (rem % 3600) // 60
+            st.success(f"▶️ 예상 소요 시간: {days}일 {hours}시간 {minutes}분")
