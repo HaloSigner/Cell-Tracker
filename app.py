@@ -22,10 +22,10 @@ st.set_page_config(
 )
 
 # ------------ Cell Health Data ------------------
-growth_file = "growth_rate_20220907.xlsx"
+growth_file = "growth_rate_20220907.csv"
 if os.path.exists(growth_file):
     try:
-        growth_df = pd.read_excel(growth_file)
+        growth_df = pd.read_csv(growth_file)
     except:
         growth_df = pd.read_csv(growth_file)
 else:
@@ -711,7 +711,7 @@ with tab3:
 with tab4:
     st.header("⏱ Growth Time Prediction")
     if growth_df.empty:
-        st.warning("growth_rate_20220907.xlsx 파일을 업로드하거나 경로를 확인하세요.")
+        st.warning("growth_rate_20220907.csv 파일을 업로드하거나 경로를 확인하세요.")
     else:
         # 4-1) 셀 라인 선택
         cell = st.selectbox(
